@@ -458,12 +458,6 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
             super(context,mMapView);
         }
 
-      @Override
-      public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        Log.d(TAG, "onScroll: ");
-        return super.onScroll(e1, e2, distanceX, distanceY);
-      }
-
         @Override
         public boolean onRotate(MotionEvent event, double rotationAngle) {
             if (rotationEnabled) {
