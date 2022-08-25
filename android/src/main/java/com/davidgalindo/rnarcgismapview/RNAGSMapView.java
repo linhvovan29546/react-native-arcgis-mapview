@@ -133,7 +133,7 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
           // enable dragging of the identified graphic to move its location
         }
         });
-      mLocationDisplay.addLocationChangedListener(locationListener());
+     
     }
   private  LocationDisplay.LocationChangedListener  locationListener () {
     LocationDisplay.LocationChangedListener locationChangedListener =
@@ -546,7 +546,6 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
 
     @Override
     public void onHostDestroy() {
-        mLocationDisplay.removeLocationChangedListener(locationListener());
         mapView.dispose();
         if (getContext() instanceof ReactContext) {
             ((ReactContext) getContext()).removeLifecycleEventListener(this);
