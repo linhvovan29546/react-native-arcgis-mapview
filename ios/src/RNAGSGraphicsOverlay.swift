@@ -17,7 +17,7 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
     var pointImageDictionary: [NSString: UIImage]
     let referenceId: NSString
     var shouldAnimateUpdate: Bool = false
-    
+
     // MARK: Initializer
     init(rawData: NSDictionary){
         guard let referenceIdRaw = rawData["referenceId"] as? NSString else {
@@ -38,12 +38,13 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         super.init()
         for item in rawDataCasted {
             if let point = RNAGSGraphicsOverlay.createPoint(rawData: item) {
+
                 let agsGraphic = RNAGSGraphicsOverlay.rnPointToAGSGraphic(point, pointImageDictionary: pointImageDictionary)
                 self.graphics.add(agsGraphic)
             }
         }
     }
-    
+
     func updateGraphic(with args: NSDictionary) {
         // First, find the graphic with the reference ID
         guard let referenceId = args["referenceId"] as? NSString else {
@@ -62,15 +63,16 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         let originalPosition = graphic.geometry as! AGSPoint
         let attributes = args["attributes"] as? [NSString: Any]
         let rotation = args["rotation"] as? NSNumber
+        let zIndex=args["zIndex"]as? Int ?? 1
         let rawLocationData = CLLocationCoordinate2D(latitude: latitude?.doubleValue ?? originalPosition.x, longitude: longitude?.doubleValue ?? originalPosition.y)
         let graphicPoint = AGSPoint(clLocationCoordinate2D: rawLocationData)
-        
+
         // Once we have all the possible update values, we change them
         if let graphicId = args["graphicId"] as? NSString, let newImage = pointImageDictionary[graphicId] {
             let symbol = AGSPictureMarkerSymbol(image: newImage)
             // update location and graphic
             graphic.symbol = symbol
-            
+
         }
         // Update geometry here
         let fromPoint = graphic.geometry as! AGSPoint
@@ -88,10 +90,11 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         if let attributes = attributes {
             graphic.attributes.addEntries(from: attributes)
         }
+        graphic.zIndex=zIndex
         // End of updates
-        
+
     }
-    
+
     let timerDuration: Double = 0.5
     var timer = Timer()
     private static let timerFireMax:NSNumber = 10.0
@@ -117,10 +120,10 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
             }
         })
     }
-    
-    
-    
-    
+
+
+
+
     // MARK: Static methods
     public static func rnPointToAGSGraphic(_ point: Point, pointImageDictionary: [NSString: UIImage]?) -> AGSGraphic{
         let graphicPoint = CLLocationCoordinate2D(latitude: point.latitude.doubleValue, longitude: point.longitude.doubleValue)
@@ -129,14 +132,18 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         if let imageId = point.imageId, let image = pointImageDictionary?[imageId] {
             let symbol = AGSPictureMarkerSymbol(image: image)
             agsGraphic = AGSGraphic(geometry: agsPoint, symbol: symbol, attributes: point.attributes)
+
         } else {
             let symbol = AGSSimpleMarkerSymbol(style: .circle, color: UIColor.green, size: 10)
             agsGraphic = AGSGraphic(geometry: agsPoint, symbol: symbol, attributes: point.attributes)
         }
+        agsGraphic.zIndex=point.zIndex
+        print("111111111 \(point.zIndex)")
         agsGraphic.attributes["referenceId"] = point.referenceId
+
         return agsGraphic
     }
-    
+
     public static func createPoint(rawData: NSDictionary) -> Point?{
         // Verify all required values are available
         if let latitude = rawData["latitude"] as? NSNumber,
@@ -146,18 +153,20 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
             let rotation = rawData["rotation"] as? NSNumber ?? 0
             let attributes = RNAGSGraphicsOverlay.convert(nsKeyedDictionary: rawData["properties"] as? [NSString: Any])
             let imageId = rawData["graphicId"] as? NSString
+            let zIndex=rawData["zIndex"]as? Int ?? 1
             return RNAGSGraphicsOverlay.Point(_latitude: latitude,
                                               _longitude: longitude,
                                               _rotation: rotation,
                                               _attributes: attributes,
                                               _referenceId: referenceId,
-                                              _imageId: imageId
+                                              _imageId: imageId,
+                                              _zIndex:zIndex
             )
         } else {
             return nil
         }
     }
-    
+
     private static func convert(nsKeyedDictionary: [NSString: Any]?) -> [String: Any]? {
         guard let nsKeyedDictionary = nsKeyedDictionary else {
             return nil
@@ -168,7 +177,7 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         }
         return result
     }
-    
+
     // MARK: Inner class
     public class Point {
         let latitude: NSNumber
@@ -177,13 +186,15 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         let attributes: [String: Any]?
         let referenceId: NSString
         let imageId: NSString?
-        init(_latitude: NSNumber, _longitude: NSNumber, _rotation: NSNumber, _attributes: [String: Any]?, _referenceId: NSString, _imageId: NSString?) {
+        let zIndex: NSInteger
+        init(_latitude: NSNumber, _longitude: NSNumber, _rotation: NSNumber, _attributes: [String: Any]?, _referenceId: NSString, _imageId: NSString?,_zIndex:NSInteger) {
             self.latitude = _latitude
             self.longitude = _longitude
             self.rotation = _rotation
             self.attributes = _attributes
             self.referenceId = _referenceId
             self.imageId = _imageId
+            self.zIndex=_zIndex
         }
     }
 }

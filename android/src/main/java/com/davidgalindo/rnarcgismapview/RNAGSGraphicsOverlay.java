@@ -84,9 +84,9 @@ public class RNAGSGraphicsOverlay {
             graphic.getAttributes().putAll(attributes);
 
         }
-        if (args.hasKey("graphicsId")) {
-            String graphicsId = args.getString("graphicsId");
-            String graphicUri = pointImageDictionary.get(graphicsId);
+        if (args.hasKey("graphicId")) {
+            String graphicId = args.getString("graphicId");
+            String graphicUri = pointImageDictionary.get(graphicId);
             if (graphicUri != null) {
                 PictureMarkerSymbol symbol = new PictureMarkerSymbol(graphicUri);
                 graphic.setSymbol(symbol);
@@ -99,6 +99,10 @@ public class RNAGSGraphicsOverlay {
         }
         if (args.hasKey("rotation")) {
             rotation = args.getDouble("rotation");
+        }
+        if(args.hasKey("zIndex")){
+          Integer zIndex=args.getInt("zIndex");
+          graphic.setZIndex(zIndex);
         }
         if (shouldAnimateUpdate) {
             Float initialRotation = (graphic.getSymbol() != null && graphic.getSymbol() instanceof PictureMarkerSymbol) ?
@@ -163,6 +167,10 @@ public class RNAGSGraphicsOverlay {
     private void addGraphicsLoop(ReadableMap map) {
         Point point = Point.fromRawData(map);
         Graphic graphic = RNAGSGraphicsOverlay.rnPointToAGSGraphic(point, pointImageDictionary);
+      if(map.hasKey("zIndex")){
+        Integer zIndex=map.getInt("zIndex");
+        graphic.setZIndex(zIndex);
+      }
         graphicsOverlay.getGraphics().add(graphic);
     }
 

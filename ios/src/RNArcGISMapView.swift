@@ -41,6 +41,18 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         self.touchDelegate = self
         self.graphicsOverlays.add(routeGraphicsOverlay)
         //display current device location
+
+        // var colorLocation = hexStringToUIColor(hex: "#B71D21")
+        // let lineSymbol = AGSSimpleLineSymbol(style: .solid, color: .white, width: 2.0)
+        // let startingPointSymbol = AGSSimpleMarkerSymbol(style: .circle, color:colorLocation , size: 18 )
+        // startingPointSymbol.outline=lineSymbol
+
+        //get image by asset
+        // if  let locationSymbol =  UIImage(named:  "locationcurrent"){
+        //     let markerSymbol = AGSPictureMarkerSymbol(image: locationSymbol)
+        //     self.locationDisplay.defaultSymbol=markerSymbol
+        //     self.locationDisplay.acquiringSymbol=markerSymbol
+        // }
         self.locationDisplay.start {[weak self] error in
             guard let self = self else {return}
             if let error = error {
@@ -51,7 +63,6 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
             self.locationDisplay.autoPanMode = .off
 
         }
-        startProcessingLocationChanges()
     }
 
     private func startProcessingLocationChanges() {
@@ -62,7 +73,8 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
             }
         }
     }
-        private func processLocationUpdate() {
+
+    private func processLocationUpdate() {
         guard let position = self.locationDisplay.mapLocation, position.x != 0, position.y != 0 else { return }
         //position
             var reactResult: [AnyHashable: Any] = [
@@ -105,7 +117,6 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
 
                         for value in closestGraphic{
                           if  let referenceId = value.attributes["referenceId"] as? NSString{
-                          print( "referenceId is : \(referenceId)" )
                           myReferenceId.append(referenceId)
                           if self?.recenterIfGraphicTapped ?? false {
                            self?.setViewpointCenter(mapPoint, completion: nil)
