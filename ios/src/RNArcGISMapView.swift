@@ -390,7 +390,7 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
                 // Get the initial zoomed view point.
           guard let self = self else { return }
           let currentScale = self.mapScale
-          let targetScale = currentScale / 2.5
+          let targetScale = currentScale / 10
           self.setViewpointScale(targetScale)
             }
             }

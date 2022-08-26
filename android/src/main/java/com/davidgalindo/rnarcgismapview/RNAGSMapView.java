@@ -226,7 +226,7 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
     //set map center
      Viewpoint viewpoint = viewpointFromPolygon(polygon);
     mapView.getMap().setInitialViewpoint(viewpoint);
-    mapView.setViewpointScaleAsync(10000.0);
+    mapView.setViewpointScaleAsync(4000.0);
 
         }
     }
