@@ -48,11 +48,11 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         // startingPointSymbol.outline=lineSymbol
 
         //get image by asset
-        // if  let locationSymbol =  UIImage(named:  "locationcurrent"){
-        //     let markerSymbol = AGSPictureMarkerSymbol(image: locationSymbol)
-        //     self.locationDisplay.defaultSymbol=markerSymbol
-        //     self.locationDisplay.acquiringSymbol=markerSymbol
-        // }
+        if  let locationSymbol =  UIImage(named:  "locationcurrent"){
+            let markerSymbol = AGSPictureMarkerSymbol(image: locationSymbol)
+            self.locationDisplay.defaultSymbol=markerSymbol
+            self.locationDisplay.acquiringSymbol=markerSymbol
+        }
         self.locationDisplay.start {[weak self] error in
             guard let self = self else {return}
             if let error = error {
