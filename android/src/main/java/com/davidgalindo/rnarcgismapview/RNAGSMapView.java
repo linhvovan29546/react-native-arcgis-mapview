@@ -114,8 +114,7 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
         routeGraphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(routeGraphicsOverlay);
 //display current device location
-   mLocationDisplay = mapView.getLocationDisplay();
-  mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
+
 //  mLocationDisplay.setInitialZoomScale(1000);
         mapView.getMap().addDoneLoadingListener(() -> {
             ArcGISRuntimeException e = mapView.getMap().getLoadError();
@@ -129,11 +128,11 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
            if (isFail == false) {
            Log.d(TAG, "onMapDidLoad success");
           // start the location display
-          mLocationDisplay.startAsync();
+             startLocation();
           // enable dragging of the identified graphic to move its location
         }
         });
-     
+
     }
   private  LocationDisplay.LocationChangedListener  locationListener () {
     LocationDisplay.LocationChangedListener locationChangedListener =
@@ -149,7 +148,31 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
       };
     return locationChangedListener;
   }
-
+private void startLocation(){
+          //todo optimize
+          mLocationDisplay = mapView.getLocationDisplay();
+          mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
+          //load icon location
+          //known issue: image size should be about 132px
+          BitmapDrawable locationMapPin = (BitmapDrawable) ContextCompat.getDrawable(getContext(), R.drawable.location_mappin);
+          ListenableFuture<PictureMarkerSymbol> selectedPinSourceSymbol = PictureMarkerSymbol.createAsync(locationMapPin);
+          selectedPinSourceSymbol.addDoneListener(() -> {
+          try {
+            // get the created picture marker symbol
+            PictureMarkerSymbol pinStarBlueSymbol = selectedPinSourceSymbol.get();
+            // set the size, if not set the image will be auto sized based on its size in pixels
+            pinStarBlueSymbol.setHeight(18);
+            pinStarBlueSymbol.setWidth(18);
+            // set the offset, to align the base of the symbol aligns with the point geometry
+            mLocationDisplay.setDefaultSymbol(pinStarBlueSymbol);
+            //start location
+            mLocationDisplay.startAsync();
+          } catch (Exception e) {
+            String error = "Error loading picture marker symbol: " + e.getMessage();
+            Log.e(TAG, error);
+          }
+        });
+}
     // MARK: Prop set methods
     public void setBasemapUrl(String url) {
         basemapUrl = url;
