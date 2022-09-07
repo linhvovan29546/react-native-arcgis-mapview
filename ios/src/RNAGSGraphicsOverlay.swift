@@ -138,7 +138,6 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
             agsGraphic = AGSGraphic(geometry: agsPoint, symbol: symbol, attributes: point.attributes)
         }
         agsGraphic.zIndex=point.zIndex
-        print("111111111 \(point.zIndex)")
         agsGraphic.attributes["referenceId"] = point.referenceId
 
         return agsGraphic

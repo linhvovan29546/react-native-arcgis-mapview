@@ -21,7 +21,10 @@ class ArcGISMapView extends React.Component {
   // MARK: Props
   static propTypes = {
     basemapUrl: PropTypes.string,
-    initialMapCenter: PropTypes.arrayOf(PropTypes.object),
+    initialMapCenter: PropTypes.objectOf({
+      points: PropTypes.arrayOf(PropTypes.object),
+      stroke: PropTypes.number
+    }),
     minZoom: PropTypes.number,
     maxZoom: PropTypes.number,
     rotationEnabled: PropTypes.bool,
@@ -37,9 +40,12 @@ class ArcGISMapView extends React.Component {
   };
 
   static defaultProps = {
-    initialMapCenter: [
-      { latitude: 36.244797, longitude: -94.148060 }
-    ],
+    initialMapCenter: {
+      points: [
+        { latitude: 36.244797, longitude: -94.148060 }
+      ],
+      stroke: 1.0
+    },
     minZoom: 0,
     maxZoom: 0,
     rotationEnabled: true,
