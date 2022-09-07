@@ -208,7 +208,7 @@ private void startLocation(){
       maximumResult=value;
     }
 
-    public void setInitialMapCenter(ReadableArray initialCenter) {
+    public void setInitialMapCenter(ReadableArray initialCenter,Integer stroke) {
         ArrayList<Point> points = new ArrayList<>();
         for (int i = 0; i < initialCenter.size(); i++) {
             ReadableMap item = initialCenter.getMap(i);
@@ -235,7 +235,11 @@ private void startLocation(){
     mapView.getGraphicsOverlays().add(graphicsOverlay);
 
     int colorStroke =  Color.parseColor("#B71D21");
-    SimpleLineSymbol blueOutlineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID,colorStroke, 1);
+    int strokeValue=1;
+    if(stroke != null){
+      strokeValue=stroke;
+    }
+    SimpleLineSymbol blueOutlineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID,colorStroke, strokeValue);
 
     Polygon polygon = new Polygon(new PointCollection(points));
 

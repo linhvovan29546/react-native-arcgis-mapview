@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -51,8 +52,10 @@ public class RNArcGISMapViewManager extends SimpleViewManager<RNAGSMapView> {
     }
 
     @ReactProp(name = "initialMapCenter")
-    public void setInitialMapCenter(RNAGSMapView view, @Nullable ReadableArray array) {
-        view.setInitialMapCenter(array);
+    public void setInitialMapCenter(RNAGSMapView view, @Nullable ReadableMap array) {
+      ReadableArray listPoint=array.getArray("points");
+      Integer stroke=array.getInt("stroke");
+      view.setInitialMapCenter(listPoint,stroke);
     }
 
     @ReactProp(name = "recenterIfGraphicTapped", defaultBoolean = false)

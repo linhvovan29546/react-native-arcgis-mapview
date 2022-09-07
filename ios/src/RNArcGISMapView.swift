@@ -357,10 +357,10 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         }
     }
 
-    @objc var initialMapCenter: NSArray? {
+    @objc var initialMapCenter: NSDictionary? {
         didSet{
             var points = [AGSPoint]()
-            if let initialMapCenter = initialMapCenter as? [NSDictionary] {
+            if let initialMapCenter = initialMapCenter?["points"] as? [NSDictionary] {
                 for rawPoint in initialMapCenter {
                     if let latitude = rawPoint["latitude"] as? NSNumber, let longitude = rawPoint["longitude"] as? NSNumber {
                         points.append(AGSPoint(x: longitude.doubleValue, y: latitude.doubleValue, spatialReference: AGSSpatialReference.wgs84()))
@@ -381,7 +381,8 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         self.graphicsOverlays.add(graphicsOverlay)
 
         let polygon = AGSPolygon(points: points)
-        let polygonSymbol = AGSSimpleFillSymbol(style: AGSSimpleFillSymbolStyle.null, color: .orange, outline: AGSSimpleLineSymbol(style: .solid, color: colorStroke, width: 1.0))
+        let stroke=initialMapCenter?["stroke"] as? CGFloat
+        let polygonSymbol = AGSSimpleFillSymbol(style: AGSSimpleFillSymbolStyle.null, color: .orange, outline: AGSSimpleLineSymbol(style: .solid, color: colorStroke, width: stroke ?? 1.0))
         let polygonGraphic = AGSGraphic(geometry: polygon, symbol: polygonSymbol)
         graphicsOverlay.graphics.add(polygonGraphic)
         //set mapcenter and scale
