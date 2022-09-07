@@ -25,6 +25,7 @@ import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.location.LocationDataSource;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
@@ -108,7 +109,7 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
 
     @SuppressLint("ClickableViewAccessibility")
     public void setUpMap() {
-        mapView.setMap(new ArcGISMap(Basemap.Type.STREETS_VECTOR, 34.057, -117.196, 17));
+        mapView.setMap(new ArcGISMap(BasemapStyle.ARCGIS_TOPOGRAPHIC));
         mapView.setOnTouchListener(new OnSingleTouchListener(getContext(),mapView));
 
         routeGraphicsOverlay = new GraphicsOverlay();
@@ -117,7 +118,7 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
 
 //  mLocationDisplay.setInitialZoomScale(1000);
         mapView.getMap().addDoneLoadingListener(() -> {
-            ArcGISRuntimeException e = mapView.getMap().getLoadError();
+             ArcGISRuntimeException e = mapView.getMap().getLoadError();
             Boolean isFail = e != null;
             String errorMessage = !isFail ? "" : e.getMessage();
             WritableMap map = Arguments.createMap();
