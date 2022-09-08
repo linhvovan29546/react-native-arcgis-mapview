@@ -386,12 +386,13 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         let polygonGraphic = AGSGraphic(geometry: polygon, symbol: polygonSymbol)
         graphicsOverlay.graphics.add(polygonGraphic)
         //set mapcenter and scale
-
-      self.setViewpointGeometry(polygon, padding: 50) { [weak self] _ in
+        let scale=initialMapCenter?["scaleIos"] as? Double
+                self.setViewpointGeometry(polygon, padding: 50) { [weak self] _ in
                 // Get the initial zoomed view point.
           guard let self = self else { return }
           let currentScale = self.mapScale
-          let targetScale = currentScale / 10
+          let divideScale = scale ?? 2.5
+          let targetScale = currentScale / divideScale
           self.setViewpointScale(targetScale)
             }
             }

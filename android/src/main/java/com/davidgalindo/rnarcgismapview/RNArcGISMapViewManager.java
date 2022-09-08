@@ -54,8 +54,17 @@ public class RNArcGISMapViewManager extends SimpleViewManager<RNAGSMapView> {
     @ReactProp(name = "initialMapCenter")
     public void setInitialMapCenter(RNAGSMapView view, @Nullable ReadableMap array) {
       ReadableArray listPoint=array.getArray("points");
-      Integer stroke=array.getInt("stroke");
-      view.setInitialMapCenter(listPoint,stroke);
+      Integer stroke=1;
+      Integer scale=10000;
+     if(
+       array.hasKey("stroke")
+      ){
+        stroke=array.getInt("stroke");
+     }
+     if( array.hasKey("scaleAndroid")) {
+       scale = array.getInt("scaleAndroid");
+     }
+      view.setInitialMapCenter(listPoint,stroke,scale);
     }
 
     @ReactProp(name = "recenterIfGraphicTapped", defaultBoolean = false)
