@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.esri.arcgisruntime.ArcGISRuntimeException;
@@ -208,7 +209,7 @@ private void startLocation(){
       maximumResult=value;
     }
 
-    public void setInitialMapCenter(ReadableArray initialCenter,Integer stroke) {
+    public void setInitialMapCenter(ReadableArray initialCenter,  Integer stroke, Integer targetScale) {
         ArrayList<Point> points = new ArrayList<>();
         for (int i = 0; i < initialCenter.size(); i++) {
             ReadableMap item = initialCenter.getMap(i);
@@ -224,11 +225,15 @@ private void startLocation(){
             points.add(point);
         }
         // If no points exist, add a sample point
+        int scale=10000;
+        if(targetScale != null){
+          scale=targetScale;
+        }
         if (points.size() == 0) {
             points.add(new Point(36.244797,-94.148060, SpatialReferences.getWgs84()));
         }
         if (points.size() == 1) {
-            mapView.getMap().setInitialViewpoint(new Viewpoint(points.get(0),10000));
+            mapView.getMap().setInitialViewpoint(new Viewpoint(points.get(0),scale));
         } else {
             // create a graphics overlay and add it to the map view
     GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
@@ -239,6 +244,7 @@ private void startLocation(){
     if(stroke != null){
       strokeValue=stroke;
     }
+
     SimpleLineSymbol blueOutlineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID,colorStroke, strokeValue);
 
     Polygon polygon = new Polygon(new PointCollection(points));
@@ -254,9 +260,9 @@ private void startLocation(){
     //set map center
      Viewpoint viewpoint = viewpointFromPolygon(polygon);
     mapView.getMap().setInitialViewpoint(viewpoint);
-    mapView.setViewpointScaleAsync(4000.0);
+    mapView.setViewpointScaleAsync(scale);
+    }
 
-        }
     }
 
     public void setMinZoom(Double value) {

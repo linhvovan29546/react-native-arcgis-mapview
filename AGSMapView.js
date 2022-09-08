@@ -23,7 +23,9 @@ class ArcGISMapView extends React.Component {
     basemapUrl: PropTypes.string,
     initialMapCenter: PropTypes.objectOf({
       points: PropTypes.arrayOf(PropTypes.object),
-      stroke: PropTypes.number
+      stroke: PropTypes.number,
+      scaleIos: PropTypes.number,
+      scaleAndroid: PropTypes.number,
     }),
     minZoom: PropTypes.number,
     maxZoom: PropTypes.number,
@@ -44,7 +46,9 @@ class ArcGISMapView extends React.Component {
       points: [
         { latitude: 36.244797, longitude: -94.148060 }
       ],
-      stroke: 1.0
+      stroke: 1.0,
+      scaleIos: 2.5,
+      scaleAndroid: 20000
     },
     minZoom: 0,
     maxZoom: 0,
