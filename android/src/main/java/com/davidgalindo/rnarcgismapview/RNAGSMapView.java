@@ -134,7 +134,9 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
           // enable dragging of the identified graphic to move its location
         }
         });
-
+        //hide power text
+      mapView.setAttributionTextVisible(false);
+       mapView.setWrapAroundMode(WrapAroundMode.DISABLED);
     }
   private  LocationDisplay.LocationChangedListener  locationListener () {
     LocationDisplay.LocationChangedListener locationChangedListener =

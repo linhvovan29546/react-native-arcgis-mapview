@@ -38,7 +38,10 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
                 self?.onMapDidLoad!(reactResult)
             }
         })
-
+        // hide attribution text for map view
+        self.isAttributionTextVisible = false
+        self.wrapAroundMode = AGSWrapAroundMode.disabled
+        
         self.touchDelegate = self
         self.graphicsOverlays.add(routeGraphicsOverlay)
         //display current device location
