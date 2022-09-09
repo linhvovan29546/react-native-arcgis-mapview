@@ -1,6 +1,6 @@
 {
   "name": "react-native-arcgis-mapview",
-  "version": "1.0.11",
+  "version": "1.0.14",
   "description": "A Basic ArcGIS port for React Native.",
   "main": "AGSMapView.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidgalindo/react-native-arcgis-mapview.git"
+    "url": "git+https://github.com/linhvovan29546/react-native-arcgis-mapview.git#master"
   },
   "bugs": {
     "url": "https://github.com/davidgalindo/react-native-arcgis-mapview/issues"
