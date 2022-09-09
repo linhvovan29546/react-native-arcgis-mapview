@@ -209,7 +209,7 @@ private void startLocation(){
       maximumResult=value;
     }
 
-    public void setInitialMapCenter(ReadableArray initialCenter,  Integer stroke, Integer targetScale) {
+    public void setInitialMapCenter(ReadableArray initialCenter,  Integer stroke,@Nullable Double targetScale) {
         ArrayList<Point> points = new ArrayList<>();
         for (int i = 0; i < initialCenter.size(); i++) {
             ReadableMap item = initialCenter.getMap(i);
@@ -225,15 +225,11 @@ private void startLocation(){
             points.add(point);
         }
         // If no points exist, add a sample point
-        int scale=10000;
-        if(targetScale != null){
-          scale=targetScale;
-        }
         if (points.size() == 0) {
             points.add(new Point(36.244797,-94.148060, SpatialReferences.getWgs84()));
         }
         if (points.size() == 1) {
-            mapView.getMap().setInitialViewpoint(new Viewpoint(points.get(0),scale));
+            mapView.getMap().setInitialViewpoint(new Viewpoint(points.get(0),1000));
         } else {
             // create a graphics overlay and add it to the map view
     GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
@@ -258,9 +254,9 @@ private void startLocation(){
     // add the polygon graphic to the graphics overlay
     graphicsOverlay.getGraphics().add(polygonGraphic);
     //set map center
-     Viewpoint viewpoint = viewpointFromPolygon(polygon);
+     Viewpoint viewpoint = viewpointFromPolygon(polygon,targetScale);
     mapView.getMap().setInitialViewpoint(viewpoint);
-    mapView.setViewpointScaleAsync(scale);
+
     }
 
     }
@@ -587,10 +583,10 @@ private void startLocation(){
     }
 
     // MARK: Misc.
-    public Viewpoint viewpointFromPolygon(Polygon polygon) {
+    public Viewpoint viewpointFromPolygon(Polygon polygon,Double targetScale) {
         Envelope envelope = polygon.getExtent();
-        Double paddingWidth = envelope.getWidth() * 0.5;
-        Double paddingHeight = envelope.getHeight() * 0.5;
+        Double paddingWidth = envelope.getWidth() * targetScale;
+        Double paddingHeight = envelope.getHeight() * targetScale;
         return new Viewpoint(new Envelope(
                 envelope.getXMin() - paddingWidth, envelope.getYMax() + paddingHeight,
                 envelope.getXMax() + paddingWidth, envelope.getYMin() - paddingHeight,

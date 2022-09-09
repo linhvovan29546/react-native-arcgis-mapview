@@ -47,8 +47,7 @@ class ArcGISMapView extends React.Component {
         { latitude: 36.244797, longitude: -94.148060 }
       ],
       stroke: 1.0,
-      scaleIos: 2.5,
-      scaleAndroid: 20000
+      mapScale: 0.5
     },
     minZoom: 0,
     maxZoom: 0,

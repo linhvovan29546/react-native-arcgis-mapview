@@ -55,14 +55,14 @@ public class RNArcGISMapViewManager extends SimpleViewManager<RNAGSMapView> {
     public void setInitialMapCenter(RNAGSMapView view, @Nullable ReadableMap array) {
       ReadableArray listPoint=array.getArray("points");
       Integer stroke=1;
-      Integer scale=10000;
-     if(
+      Double scale=0.5;
+      if(
        array.hasKey("stroke")
       ){
         stroke=array.getInt("stroke");
      }
-     if( array.hasKey("scaleAndroid")) {
-       scale = array.getInt("scaleAndroid");
+     if( array.hasKey("mapScale")) {
+       scale = array.getDouble("mapScale");
      }
       view.setInitialMapCenter(listPoint,stroke,scale);
     }
