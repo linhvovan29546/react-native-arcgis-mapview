@@ -27,7 +27,8 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
 
     func setUpMap() {
         // Default is to Esri HQ
-        self.map = AGSMap(basemapType: .topographic, latitude: 34.057, longitude: -117.196, levelOfDetail: 17)
+        self.map  =   AGSMap(basemapStyle: .arcGISTopographic)
+        // self.map = AGSMap(basemapType: .topographic, latitude: 34.057, longitude: -117.196, levelOfDetail: 17)
         self.map?.load(completion: {[weak self] (error) in
             if (self?.onMapDidLoad != nil){
                 var reactResult: [AnyHashable: Any] = ["success" : error != nil]
