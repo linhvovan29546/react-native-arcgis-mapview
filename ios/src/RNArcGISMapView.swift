@@ -199,6 +199,10 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
     }
 
     @objc func addGraphicsOverlay(_ args: NSDictionary) {
+        let isRefresh = (args["refreshList"] as? Bool) ?? false
+        if(isRefresh){
+            self.graphicsOverlays.removeAllObjects()
+        }
         let rnRawGraphicsOverlay = RNAGSGraphicsOverlay(rawData: args)
         self.graphicsOverlays.add(rnRawGraphicsOverlay)
         if (onOverlayWasAdded != nil) {

@@ -345,6 +345,9 @@ private void startLocation(){
 
     // Layer add/remove
     public void addGraphicsOverlay(ReadableMap args) {
+        if(args.hasKey("refreshList") && args.getBoolean("refreshList") == true) {
+            mapView.getGraphicsOverlays().clear();
+        }
         GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
         RNAGSGraphicsOverlay overlay = new RNAGSGraphicsOverlay(args, graphicsOverlay);
