@@ -21,7 +21,7 @@ class ArcGISMapView extends React.Component {
   // MARK: Props
   static propTypes = {
     basemapUrl: PropTypes.string,
-    initialMapCenter: PropTypes.objectOf({
+    initialMapCenter: PropTypes.shape({
       points: PropTypes.arrayOf(PropTypes.object),
       stroke: PropTypes.number,
       scaleIos: PropTypes.number,
