@@ -76,6 +76,8 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
     Double maxZoom = 0.0;
     Boolean rotationEnabled = true;
     LocationDisplay mLocationDisplay;
+    RNAGSGraphicsOverlay overlay;
+
     // MARK: Initializers
     public RNAGSMapView(Context context) {
         super(context);
@@ -350,7 +352,7 @@ private void startLocation(){
         }
         GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
-        RNAGSGraphicsOverlay overlay = new RNAGSGraphicsOverlay(args, graphicsOverlay);
+        overlay = new RNAGSGraphicsOverlay(args, graphicsOverlay);
         rnGraphicsOverlays.put(overlay.getReferenceId(), overlay);
     }
 
@@ -582,6 +584,9 @@ private void startLocation(){
 
     @Override
     public void onHostDestroy() {
+        if(overlay!=null){
+            overlay.stopThread();
+        }
         mapView.dispose();
         if (getContext() instanceof ReactContext) {
             ((ReactContext) getContext()).removeLifecycleEventListener(this);

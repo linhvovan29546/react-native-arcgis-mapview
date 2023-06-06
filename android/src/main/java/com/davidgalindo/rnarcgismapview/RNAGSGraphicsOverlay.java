@@ -23,6 +23,9 @@ public class RNAGSGraphicsOverlay {
     private HashMap<String, String> pointImageDictionary;
     private String referenceId;
     private Boolean shouldAnimateUpdate = false;
+    volatile boolean running = true;
+    private static Runnable addGraphicRunnable;
+    private static Thread addGraphicThread;
 
     public RNAGSGraphicsOverlay(ReadableMap rawData, GraphicsOverlay graphicsOverlay) {
         this.referenceId = rawData.getString("referenceId");
@@ -38,13 +41,49 @@ public class RNAGSGraphicsOverlay {
                 pointImageDictionary.put(graphicId, uri);
             }
         }
-        // Create graphics within overlay
-        ReadableArray rawPoints = rawData.getArray("points");
-        for (int i = 0; i < rawPoints.size(); i++) {
-            addGraphicsLoop(rawPoints.getMap(i));
+        forceResumeThread();
 
+        // Create graphics within overlay
+        addGraphicRunnable=new Runnable() {
+            public void run() {
+            try {
+                ReadableArray rawPoints = rawData.getArray("points");
+                for (int i = 0; i < rawPoints.size(); i++) {
+                //force sleep each 100 time to prevent performance when back to previous screen while add graphic
+                boolean isSleep= i%100 == 0;
+                if( i!=0 && isSleep ){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                }
+                if(!running) {
+                    break;
+                }
+                addGraphicsLoop(rawPoints.getMap(i));
+                }
+                cancel();
+            } catch (Exception e) {
+            }
+
+            }
+            public void cancel() {
+            running=false;
         }
+        };
+        addGraphicThread=new Thread(addGraphicRunnable);
+        addGraphicThread.start();
     }
+
+    private void forceResumeThread(){
+        running=false;
+        running=true;
+    }
+    
+    public void stopThread(){
+        running=false;
+      }
 
     // Getters
     public GraphicsOverlay getAGSGraphicsOverlay() {

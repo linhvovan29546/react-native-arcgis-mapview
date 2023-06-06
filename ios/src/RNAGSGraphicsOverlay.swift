@@ -17,7 +17,9 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
     var pointImageDictionary: [NSString: UIImage]
     let referenceId: NSString
     var shouldAnimateUpdate: Bool = false
-
+    static var runningQueue: Bool = {
+        return false
+    }()
     // MARK: Initializer
     init(rawData: NSDictionary){
         guard let referenceIdRaw = rawData["referenceId"] as? NSString else {
@@ -35,13 +37,21 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
                 }
             }
         }
+        RNAGSGraphicsOverlay.forceResumeQueue()
         super.init()
-        for item in rawDataCasted {
-            if let point = RNAGSGraphicsOverlay.createPoint(rawData: item) {
+        let queue = DispatchQueue(label: "queueAddGraphic", qos: .utility)
+        queue.async {
+            for item in rawDataCasted {
+                if(!RNAGSGraphicsOverlay.runningQueue){
+                    break
+                }
+                if let point = RNAGSGraphicsOverlay.createPoint(rawData: item) {
 
-                let agsGraphic = RNAGSGraphicsOverlay.rnPointToAGSGraphic(point, pointImageDictionary: pointImageDictionary)
-                self.graphics.add(agsGraphic)
+                    let agsGraphic = RNAGSGraphicsOverlay.rnPointToAGSGraphic(point, pointImageDictionary: self.pointImageDictionary)
+                    self.graphics.add(agsGraphic)
+                }
             }
+            RNAGSGraphicsOverlay.stopAddGraphicQueue()
         }
     }
 
@@ -175,6 +185,14 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
             result[String(key)] = nsKeyedDictionary[key]
         }
         return result
+    }
+    private static func forceResumeQueue(){
+        self.runningQueue=false
+        self.runningQueue=true
+    }
+
+    public static func stopAddGraphicQueue() {
+    self.runningQueue=false
     }
 
     // MARK: Inner class
