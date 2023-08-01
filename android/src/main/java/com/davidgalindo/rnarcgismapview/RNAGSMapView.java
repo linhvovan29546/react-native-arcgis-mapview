@@ -23,6 +23,7 @@ import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.Polyline;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
+import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.location.LocationDataSource;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
@@ -77,6 +78,9 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
     Boolean rotationEnabled = true;
     LocationDisplay mLocationDisplay;
     RNAGSGraphicsOverlay overlay;
+    ReadableArray initialCenter;
+    Integer stroke;
+    Double targetScale;
 
     // MARK: Initializers
     public RNAGSMapView(Context context) {
@@ -114,14 +118,13 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
     @SuppressLint("ClickableViewAccessibility")
     public void setUpMap() {
         mapView.setMap(new ArcGISMap(BasemapStyle.ARCGIS_TOPOGRAPHIC));
+        mapView.setBackgroundColor(Color.parseColor("#B7B7B7"));
         mapView.setOnTouchListener(new OnSingleTouchListener(getContext(),mapView));
-
         routeGraphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(routeGraphicsOverlay);
-//display current device location
-
-//  mLocationDisplay.setInitialZoomScale(1000);
+        //display current device location
         mapView.getMap().addDoneLoadingListener(() -> {
+
              ArcGISRuntimeException e = mapView.getMap().getLoadError();
             Boolean isFail = e != null;
             String errorMessage = !isFail ? "" : e.getMessage();
@@ -138,9 +141,10 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
         }
         });
         //hide power text
-      mapView.setAttributionTextVisible(false);
+        mapView.setAttributionTextVisible(false);
        mapView.setWrapAroundMode(WrapAroundMode.DISABLED);
     }
+
   private  LocationDisplay.LocationChangedListener  locationListener () {
     LocationDisplay.LocationChangedListener locationChangedListener =
       (LocationDisplay.LocationChangedEvent locationChangedEvent) -> {
@@ -201,6 +205,17 @@ private void startLocation(){
         basemap.loadAsync();
     }
 
+  public void reLoadMap() {
+    boolean isLoadFail= mapView.getMap().getLoadStatus() == LoadStatus.FAILED_TO_LOAD;
+    if(isLoadFail){
+      setUpMap();
+      setMinZoom(minZoom);
+      setMaxZoom(maxZoom);
+      setInitialMapCenter(initialCenter,stroke,targetScale);
+    }
+  }
+
+
     public void setRouteUrl(String url) {
         routeUrl = url;
         router = new RNAGSRouter(getContext().getApplicationContext(), routeUrl);
@@ -214,7 +229,10 @@ private void startLocation(){
       maximumResult=value;
     }
 
-    public void setInitialMapCenter(ReadableArray initialCenter,  Integer stroke,@Nullable Double targetScale) {
+    public void setInitialMapCenter(ReadableArray initialCenterProps,  Integer strokeProps,@Nullable Double targetScaleProps) {
+        initialCenter=initialCenterProps;
+        stroke=strokeProps;
+        targetScale=targetScaleProps;
         ArrayList<Point> points = new ArrayList<>();
         for (int i = 0; i < initialCenter.size(); i++) {
             ReadableMap item = initialCenter.getMap(i);
@@ -250,7 +268,7 @@ private void startLocation(){
 
     Polygon polygon = new Polygon(new PointCollection(points));
 
- // create an orange fill symbol with 20% transparency and the blue simple line symbol
+    // create an orange fill symbol with 20% transparency and the blue simple line symbol
     SimpleFillSymbol polygonFillSymbol =
       new SimpleFillSymbol(SimpleFillSymbol.Style.NULL, 0x80FF5733, blueOutlineSymbol);
 
@@ -347,13 +365,23 @@ private void startLocation(){
 
     // Layer add/remove
     public void addGraphicsOverlay(ReadableMap args) {
+      mapView.getMap().addDoneLoadingListener(() -> {
         if(args.hasKey("refreshList") && args.getBoolean("refreshList") == true) {
-            mapView.getGraphicsOverlays().clear();
+          mapView.getGraphicsOverlays().clear();
+          if(overlay!=null){
+            overlay.stopThread();
+          }
         }
         GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
-        overlay = new RNAGSGraphicsOverlay(args, graphicsOverlay);
-        rnGraphicsOverlays.put(overlay.getReferenceId(), overlay);
+        ArcGISRuntimeException e = mapView.getMap().getLoadError();
+        Boolean isFail = e != null;
+        if (isFail == false) {
+          overlay = new RNAGSGraphicsOverlay(args, graphicsOverlay);
+          rnGraphicsOverlays.put(overlay.getReferenceId(), overlay);
+        }
+      });
+
     }
 
     public void removeGraphicsOverlay(String removalId) {
@@ -440,7 +468,7 @@ private void startLocation(){
         if (args.hasKey("routeColor")) {
             color = args.getString("routeColor");
         } else {
-            color = "#FF0000";
+            color = "#B7B7B7";
         }
         assert overlay != null;
         ListenableFuture<RouteResult> future = router.createRoute(overlay.getAGSGraphicsOverlay(),removeGraphics);

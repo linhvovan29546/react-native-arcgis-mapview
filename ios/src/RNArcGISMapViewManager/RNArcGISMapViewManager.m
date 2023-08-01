@@ -45,6 +45,8 @@ RCT_EXTERN_METHOD(setApiKey:(nonnull NSString*)key)
 
 
 RCT_EXTERN_METHOD(dispose:(nonnull NSNumber*) node)
+
+RCT_EXTERN_METHOD(reloadMap:(nonnull NSNumber*) node)
 @end
 
 @interface RCT_EXTERN_MODULE(RNArcGISMapViewModule, RCTEventEmitter)

@@ -37,8 +37,8 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
                 }
             }
         }
-        RNAGSGraphicsOverlay.forceResumeQueue()
         super.init()
+        RNAGSGraphicsOverlay.forceResumeQueue()
         let queue = DispatchQueue(label: "queueAddGraphic", qos: .utility)
         queue.async {
             for item in rawDataCasted {
@@ -187,7 +187,6 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         return result
     }
     private static func forceResumeQueue(){
-        self.runningQueue=false
         self.runningQueue=true
     }
 

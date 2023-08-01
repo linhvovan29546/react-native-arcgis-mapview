@@ -23,7 +23,9 @@ public class RNArcGISMapViewManager extends SimpleViewManager<RNAGSMapView> {
     private final int UPDATE_POINTS_IN_GRAPHICS_OVERLAY = 7;
     private final int ROUTE_GRAPHICS_OVERLAY = 8;
     private final int SET_ROUTE_IS_VISIBLE = 9;
-    private final int DISPOSE = 999;
+    private final int RE_LOAD_MAP = 10;
+
+  private final int DISPOSE = 999;
 
     // MARK Initializing methods
     @Override
@@ -109,7 +111,9 @@ public class RNArcGISMapViewManager extends SimpleViewManager<RNAGSMapView> {
         map.put("routeGraphicsOverlayViaManager",ROUTE_GRAPHICS_OVERLAY);
         map.put("setRouteIsVisible", SET_ROUTE_IS_VISIBLE);
         map.put("dispose", DISPOSE);
-        return map;
+        map.put("reloadMap", RE_LOAD_MAP);
+
+      return map;
     }
 
     @Override
@@ -126,6 +130,7 @@ public class RNArcGISMapViewManager extends SimpleViewManager<RNAGSMapView> {
             case UPDATE_POINTS_IN_GRAPHICS_OVERLAY: mapView.updatePointsInGraphicsOverlay(args.getMap(0));return;
             case ROUTE_GRAPHICS_OVERLAY: mapView.routeGraphicsOverlay(args.getMap(0));return;
             case SET_ROUTE_IS_VISIBLE: mapView.setRouteIsVisible(args.getBoolean(0));return;
+            case RE_LOAD_MAP:mapView.reLoadMap();return;
             case DISPOSE: mapView.onHostDestroy();
         }
     }

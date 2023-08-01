@@ -104,6 +104,12 @@ public class RNArcGISMapViewManager: RCTViewManager {
         self.agsMapView = nil
     }
 
+    @objc func reloadMap(_ node: NSNumber) {
+        DispatchQueue.main.async {
+            self.agsMapView?.reloadMap()
+        }
+    }
+
     @objc func setLicenseKey(_ key: String) {
         do {
             try AGSArcGISRuntimeEnvironment.setLicenseKey(key)
