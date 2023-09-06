@@ -28,6 +28,7 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.BackgroundGrid;
 import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
@@ -120,7 +121,8 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
 
 //  mLocationDisplay.setInitialZoomScale(1000);
         mapView.getMap().addDoneLoadingListener(() -> {
-             ArcGISRuntimeException e = mapView.getMap().getLoadError();
+          try {
+            ArcGISRuntimeException e = mapView.getMap().getLoadError();
             Boolean isFail = e != null;
             String errorMessage = !isFail ? "" : e.getMessage();
             WritableMap map = Arguments.createMap();
@@ -128,16 +130,25 @@ public class RNAGSMapView extends LinearLayout implements LifecycleEventListener
             map.putString("errorMessage",errorMessage);
 
             emitEvent("onMapDidLoad",map);
-           if (isFail == false) {
-           Log.d(TAG, "onMapDidLoad success");
-          // start the location display
-             startLocation();
-          // enable dragging of the identified graphic to move its location
-        }
+            if (isFail == false) {
+              Log.d(TAG, "onMapDidLoad success");
+              // start the location display
+              startLocation();
+              // enable dragging of the identified graphic to move its location
+            }
+          } catch (Exception e) {
+
+          }
+
         });
         //hide power text
-      mapView.setAttributionTextVisible(false);
-       mapView.setWrapAroundMode(WrapAroundMode.DISABLED);
+       mapView.setAttributionTextVisible(false);
+       mapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
+       BackgroundGrid backgroundGrid = new BackgroundGrid();
+      backgroundGrid.setColor(Color.WHITE);
+      backgroundGrid.setGridLineColor(Color.WHITE);
+      backgroundGrid.setGridLineWidth(0);
+      mapView.setBackgroundGrid(backgroundGrid);
     }
   private  LocationDisplay.LocationChangedListener  locationListener () {
     LocationDisplay.LocationChangedListener locationChangedListener =

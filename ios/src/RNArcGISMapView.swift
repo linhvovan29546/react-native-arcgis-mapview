@@ -40,7 +40,9 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         })
         // hide attribution text for map view
         self.isAttributionTextVisible = false
-        self.wrapAroundMode = AGSWrapAroundMode.disabled
+        self.backgroundGrid?.gridLineWidth=0
+        self.backgroundGrid?.gridSize=0
+        self.backgroundGrid?.color = .white
         
         self.touchDelegate = self
         self.graphicsOverlays.add(routeGraphicsOverlay)
