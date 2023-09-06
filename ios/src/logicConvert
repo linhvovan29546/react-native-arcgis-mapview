@@ -1,0 +1,252 @@
+import { Image, ImageSourcePropType, Linking, Platform } from 'react-native';
+import { get, has, set } from 'lodash';
+import { listVoterBlockWalk, polyLineType, VisitTemp, GetCurrentLocationCallback } from './model';
+import { store } from '@src/redux/store';
+import { ICON_LOCATION_GREEN, ICON_LOCATION_RED, ICON_LOCATION_YELLOW } from '@src/constants/icons';
+import { SupportStatusTypes, VoterBlockwalker } from '@goldfishcode/kingmakerdata-api-mobile-sdk/libs/api/blockwalker/models';
+import { formatPhoneNumber } from '@src/utils/phone';
+import Geolocation, { GeoError, GeoPosition } from 'react-native-geolocation-service';
+import { PermissionLocation } from '@src/modules/services/permissions/location';
+
+export const GRAPHIC_ID = 'graphicsOverlay';
+export const yellowGraphic = 'yellowGraphic';
+export const greenGraphic = 'greenGraphic';
+export const redGraphic = 'redGraphic';
+interface SameLatLng {
+  [key: string]: {
+    list: VoterBlockwalker[];
+    countGreen: number;
+  };
+}
+
+const convertUriFromSource = (uri: string, image: ImageSourcePropType) => {
+  const sourceAndroid = {
+    uri: uri,
+  };
+  const source = Platform.select({
+    android: sourceAndroid,
+    default: Image.resolveAssetSource(image),
+  });
+  return source;
+};
+export enum locationIconUri {
+  GREEN = 'https://dev-kingmakerdata-api-media.s3.amazonaws.com/photo/icon_location_green%403x.png',
+  RED = 'https://dev-kingmakerdata-api-media.s3.amazonaws.com/photo/icon_location_red%403x.png',
+  YELLOW = 'https://dev-kingmakerdata-api-media.s3.amazonaws.com/photo/icon_location_yellow%403x.png',
+}
+
+export const pointGraphics = {
+  pointGraphics: [
+    {
+      graphicId: greenGraphic,
+      graphic: convertUriFromSource(locationIconUri.GREEN, ICON_LOCATION_GREEN),
+    },
+    {
+      graphicId: redGraphic,
+      graphic: convertUriFromSource(locationIconUri.RED, ICON_LOCATION_RED),
+    },
+    {
+      graphicId: yellowGraphic,
+      graphic: convertUriFromSource(locationIconUri.YELLOW, ICON_LOCATION_YELLOW),
+    },
+    { graphicId: '', graphic: convertUriFromSource(locationIconUri.RED, ICON_LOCATION_RED) },
+  ],
+  referenceId: GRAPHIC_ID,
+};
+
+export const checkColorGreenOrRed = (item: VoterBlockwalker): boolean => {
+  //If True=> Green, otherwise => Red
+  return !!item.support_status_temp || !!item.support_status;
+};
+
+export const convertListToPoint = (listBlock: listVoterBlockWalk[], isUpdate = false) => {
+  let listBlockWalk = listBlock;
+  if (isUpdate) {
+    const listBlockWalkStore = store.getState().blockWalker.listBlockWalk;
+    const blockWalk = listBlock[0];
+    const latlng = `${blockWalk.latitude},${blockWalk.longitude}`;
+    const newListBlockWalk = listBlockWalkStore.filter(obj => latlng === `${obj.latitude},${obj.longitude}`);
+    const updateList = newListBlockWalk.map(value => {
+      if (blockWalk.id.toString() === value.id.toString()) return blockWalk;
+      return value;
+    });
+    listBlockWalk = updateList;
+  }
+
+  return addFlagIsYellowToList(listBlockWalk);
+};
+
+export const getListBlockWalkByListId = (listId: string[]) => {
+  const listBlockWalkStore = store.getState().blockWalker.listBlockWalk;
+  const newListBlockWalk: VoterBlockwalker[] = [];
+  listId.forEach(element => {
+    const blockWalk = listBlockWalkStore.find(item => item.id.toString() === element.toString());
+    if (!blockWalk) return;
+    newListBlockWalk.push(blockWalk);
+  });
+  return newListBlockWalk;
+};
+const replaceDotToComma = (txt: string) => {
+  return txt.replace(/\./g, ',');
+};
+
+export const addFlagIsYellowToList = (list: VoterBlockwalker[]) => {
+  // structure
+  // {
+  //   ['lat,lng']:[{
+  //     a
+  //   },{b}]
+  // }
+  const objectSameLatLng: SameLatLng = {};
+  for (let index = 0; index < list.length - 1; index++) {
+    const item = list[index];
+    let sameArray = [item];
+    const latLng = `${item.latitude},${item.longitude}`;
+    let countGreen = 0;
+    const latLngKey = replaceDotToComma(`${item.latitude},${item.longitude}`);
+    //if this object has `latLngKey` => index ++
+    if (get(objectSameLatLng, latLngKey, '')) {
+      continue;
+    }
+    if (checkColorGreenOrRed(item)) countGreen++;
+    for (let nextIndex = index; nextIndex < list.length - 1; nextIndex++) {
+      const nextValue = list[nextIndex + 1];
+      const nextLatLng = `${nextValue?.latitude},${nextValue?.longitude}`;
+      if (latLng === nextLatLng) {
+        sameArray.push(nextValue);
+        //total item with color is green
+        if (checkColorGreenOrRed(nextValue)) countGreen++;
+        set(objectSameLatLng, `${latLngKey}.list`, sameArray);
+        set(objectSameLatLng, `${latLngKey}.countGreen`, countGreen);
+        continue;
+      }
+    }
+  }
+  // New list able use to argis map
+
+  const duplicates = list.map((obj, index) => {
+    //get object duplicate
+    let isYellow = false;
+    let graphicId = '';
+    let countDuplicate = 0;
+    const latLng = `${obj.latitude},${obj.longitude}`;
+    const listDuplicateLatLng = objectSameLatLng[replaceDotToComma(latLng)]?.list || [];
+    const countGreen = objectSameLatLng[replaceDotToComma(latLng)]?.countGreen || 0;
+    countDuplicate = listDuplicateLatLng.length;
+
+    // use case1: two object same latitude and longitude=> if only one object is green/red =>  isYellow is true
+    // use case2:  two object same latitude and longitude=> if both object is green/red =>  isYellow is false
+    if (countGreen && countGreen !== countDuplicate) isYellow = true;
+
+    if (isYellow) {
+      graphicId = yellowGraphic;
+    } else {
+      const isGreen = checkColorGreenOrRed(obj);
+      graphicId = isGreen ? greenGraphic : redGraphic;
+    }
+
+    return {
+      ...obj,
+      isYellow,
+      graphicId,
+      referenceId: `${obj.id}`,
+      rotation: 0,
+    };
+  });
+
+  return duplicates;
+};
+
+export const convertParamsToEnterData = (data: VoterBlockwalker) => {
+  const firstName = get(data, 'first_name', '') || '';
+  const middleName = get(data, 'middle_name', '') || '';
+  const lastName = get(data, 'last_name', '') || '';
+  const address = get(data, 'address', '');
+  const city = get(data, 'city', '');
+  const phoneNumber = data.phone1 || data.phone2 || '';
+  const additionAnswer = get(data, 'content_talk', '') || '';
+  const supportStatus = data.support_status_temp || data.support_status || '';
+  const topIssue = get(data, 'top_issue', '');
+  const lastUpdated = get(data, 'modified', '');
+
+  let name = '';
+  if (!!middleName) {
+    name = `${firstName} ${middleName} ${lastName}`;
+  } else {
+    name = `${firstName} ${lastName}`;
+  }
+  const fullAddress = [address, city].filter(text => !!text).join(', ');
+  const addresses = [fullAddress];
+  const result = {
+    id: data.id,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    name,
+    addresses,
+    phoneNumber: formatPhoneNumber(phoneNumber),
+    supportStatus,
+    topIssue,
+    lastUpdated,
+    value: data.id,
+    label: name.trim(),
+    additionAnswer,
+  };
+  return result;
+};
+
+export const convertMapBlockWalkToEnterData = (data: VoterBlockwalker[]) => {
+  const result = data.map(item => {
+    return convertParamsToEnterData(item);
+  });
+  return result;
+};
+
+export const convertPolyGonToMap = (polygon: any[]) => {
+  const polyLine: polyLineType[] = [];
+  //Note index 0 => longitude,index 1 => latitude
+  polygon.forEach(element => {
+    const item = { longitude: element[0], latitude: element[1] };
+    polyLine.push(item);
+  });
+  return polyLine;
+};
+
+export const getListBlockwalkByPoint = (polyline: polyLineType, defaultValues: VoterBlockwalker) => {
+  const listBlockWalkStore = store.getState().blockWalker.listBlockWalk;
+  const condition = (blockwalk: VoterBlockwalker) => {
+    if (has(polyline, 'latitude') && has(polyline, 'longitude')) {
+      return blockwalk.latitude === polyline.latitude && blockwalk.longitude === polyline.longitude;
+    }
+
+    return false;
+  };
+  const result = listBlockWalkStore.filter(condition);
+  return result && result.length > 0 ? result : [defaultValues];
+};
+
+const _goToSetting = () => {
+  Linking.openSettings();
+};
+
+export const checkPermissionLocation = async (isRequest = true) => {
+  if (isRequest) {
+    PermissionLocation.instance().checkAndRequestLocationPermission();
+  } else {
+    PermissionLocation.instance().checkLocationPermission();
+  }
+};
+
+export const getCurrentLocation = (options: GetCurrentLocationCallback) => {
+  const { onSuccess, onError } = options;
+  Geolocation.getCurrentPosition(
+    (position: GeoPosition) => {
+      onSuccess(position);
+    },
+    (error: GeoError) => {
+      onError && onError(error);
+    },
+    {
+      maximumAge: 0,
+    },
+  );
+};

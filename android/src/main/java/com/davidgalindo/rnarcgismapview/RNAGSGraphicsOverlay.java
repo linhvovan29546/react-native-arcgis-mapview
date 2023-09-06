@@ -1,6 +1,7 @@
 package com.davidgalindo.rnarcgismapview;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
@@ -23,6 +24,9 @@ public class RNAGSGraphicsOverlay {
     private HashMap<String, String> pointImageDictionary;
     private String referenceId;
     private Boolean shouldAnimateUpdate = false;
+    volatile boolean running = true;
+    private static Runnable addGraphicRunnable;
+    private static Thread addGraphicThread;
 
     public RNAGSGraphicsOverlay(ReadableMap rawData, GraphicsOverlay graphicsOverlay) {
         this.referenceId = rawData.getString("referenceId");
@@ -39,11 +43,43 @@ public class RNAGSGraphicsOverlay {
             }
         }
         // Create graphics within overlay
-        ReadableArray rawPoints = rawData.getArray("points");
-        for (int i = 0; i < rawPoints.size(); i++) {
-            addGraphicsLoop(rawPoints.getMap(i));
+        addGraphicRunnable=new Runnable() {
+            public void run() {
+            try {
+                ReadableArray rawPoints = rawData.getArray("points");
+                for (int i = 0; i < rawPoints.size(); i++) {
+                //force sleep each 50 time to prevent performance when back to previous screen while add graphic
+                boolean isSleep= i%50 == 0;
+                if( i != 0 && isSleep ){
+                Thread.sleep(100);
+                }
+                  if(!running) {
+                    break;
+                }
+                addGraphicsLoop(rawPoints.getMap(i));
+                }
+                addGraphicRunnable.wait(100);
+                cancel();
+            } catch (Exception e) {
+            }
 
+            }
+            public void cancel() {
+            running=false;
         }
+        };
+        addGraphicThread=new Thread(addGraphicRunnable);
+        addGraphicThread.start();
+    }
+
+
+    public void stopThread(){
+      try{
+        addGraphicRunnable.wait(100);
+      } catch (Exception e) {
+      }
+
+      running=false;
     }
 
     // Getters
@@ -61,6 +97,7 @@ public class RNAGSGraphicsOverlay {
 
     public void updateGraphics(ReadableArray args) {
         for (int i = 0; i < args.size(); i++) {
+
             updateGraphicLoop(args.getMap(i));
         }
     }

@@ -98,9 +98,16 @@ public class RNArcGISMapViewManager: RCTViewManager {
     }
 
     @objc func dispose(_ node: NSNumber) {
+        RNAGSGraphicsOverlay.stopAddGraphicQueue()
         self.agsMapView?.graphicsOverlays.removeAllObjects()
         self.agsMapView?.map = nil
         self.agsMapView = nil
+    }
+
+    @objc func reloadMap(_ node: NSNumber) {
+        DispatchQueue.main.async {
+            self.agsMapView?.reloadMap()
+        }
     }
 
     @objc func setLicenseKey(_ key: String) {
