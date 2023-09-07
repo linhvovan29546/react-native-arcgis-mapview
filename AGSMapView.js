@@ -157,13 +157,13 @@ class ArcGISMapView extends React.Component {
       [args]
     );
   };
-
-  updatePointsOnOverlay = () => {
+  
+  updatePointsOnOverlay = (args) => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.agsMapRef),
       UIManager.getViewManagerConfig("RNArcGISMapView").Commands
         .updatePointsInGraphicsOverlayViaManager,
-      []
+      [args]
     );
   };
 
