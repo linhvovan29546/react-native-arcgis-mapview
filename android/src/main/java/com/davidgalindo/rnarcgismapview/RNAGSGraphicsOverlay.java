@@ -55,7 +55,6 @@ public class RNAGSGraphicsOverlay {
         addGraphicRunnable.wait(100);
       } catch (Exception e) {
       }
-
       running=false;
     }
 
@@ -73,10 +72,28 @@ public class RNAGSGraphicsOverlay {
     }
 
     public void updateGraphics(ReadableArray args) {
-        for (int i = 0; i < args.size(); i++) {
+//       Create graphics within overlay
+         addGraphicRunnable=new Runnable() {
+           public void run() {
+           try {
+               for (int i = 0; i < args.size(); i++) {
+                 if(!running) {
+                   break;
+               }
+                 updateGraphicLoop(args.getMap(i));
+               }
+               addGraphicRunnable.wait(100);
+               cancel();
+           } catch (Exception e) {
+           }
 
-            updateGraphicLoop(args.getMap(i));
-        }
+           }
+           public void cancel() {
+           running=false;
+       }
+       };
+       addGraphicThread=new Thread(addGraphicRunnable);
+       addGraphicThread.start();
     }
 
     private void updateGraphicLoop(ReadableMap args) {
@@ -173,33 +190,11 @@ public class RNAGSGraphicsOverlay {
     }
 
     public void addGraphics(ReadableArray args) {
-      // Create graphics within overlay
-      addGraphicRunnable=new Runnable() {
-        public void run() {
-        try {
-            for (int i = 0; i < args.size(); i++) {
-            //force sleep each 50 time to prevent performance when back to previous screen while add graphic
-            boolean isSleep= i%50 == 0;
-            if( i != 0 && isSleep ){
-            Thread.sleep(100);
-            }
-              if(!running) {
-                break;
-            }
-            addGraphicsLoop(args.getMap(i));
-            }
-            addGraphicRunnable.wait(100);
-            cancel();
-        } catch (Exception e) {
+      for (int i = 0; i < args.size(); i++) {
+        addGraphicsLoop(args.getMap(i));
         }
 
-        }
-        public void cancel() {
-        running=false;
-    }
-    };
-    addGraphicThread=new Thread(addGraphicRunnable);
-    addGraphicThread.start();
+
     }
 
     private void addGraphicsLoop(ReadableMap map) {

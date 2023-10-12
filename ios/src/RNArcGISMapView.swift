@@ -45,7 +45,7 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         self.backgroundGrid?.gridLineWidth=0
         self.backgroundGrid?.gridSize=0
         self.backgroundGrid?.color = .white
-        
+
         self.touchDelegate = self
         self.graphicsOverlays.add(routeGraphicsOverlay)
         //display current device location
@@ -276,9 +276,17 @@ public class RNArcGISMapView: AGSMapView, AGSGeoViewTouchDelegate {
         let shouldAnimateUpdate = (args["animated"] as? Bool) ?? false
         overlay.shouldAnimateUpdate = shouldAnimateUpdate
         if let updates = args["updates"] as? [NSDictionary] {
+          RNAGSGraphicsOverlay.forceResumeQueue()
+            let queue = DispatchQueue(label: "queueUpdateGraphic", qos: .utility)
+            queue.async {
             for update in updates {
+                if(!RNAGSGraphicsOverlay.runningQueue){
+                    break
+                }
                 overlay.updateGraphic(with: update)
             }
+        }
+
         }
         reportToOverlayDidLoadListener(referenceId: args["overlayReferenceId"] as! NSString, action: "update", success: true, errorMessage: nil)
     }
