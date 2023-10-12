@@ -38,10 +38,7 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
             }
         }
         super.init()
-        RNAGSGraphicsOverlay.forceResumeQueue()
-        let queue = DispatchQueue(label: "queueAddGraphic", qos: .utility)
-        queue.async {
-            for item in rawDataCasted {
+        for item in rawDataCasted {
                 if(!RNAGSGraphicsOverlay.runningQueue){
                     break
                 }
@@ -50,8 +47,6 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
                     let agsGraphic = RNAGSGraphicsOverlay.rnPointToAGSGraphic(point, pointImageDictionary: self.pointImageDictionary)
                     self.graphics.add(agsGraphic)
                 }
-            }
-            RNAGSGraphicsOverlay.stopAddGraphicQueue()
         }
     }
 
@@ -186,7 +181,7 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         }
         return result
     }
-    private static func forceResumeQueue(){
+    public static func forceResumeQueue(){
         self.runningQueue=true
     }
 
