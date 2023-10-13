@@ -39,9 +39,6 @@ public class RNAGSGraphicsOverlay: AGSGraphicsOverlay {
         }
         super.init()
         for item in rawDataCasted {
-                if(!RNAGSGraphicsOverlay.runningQueue){
-                    break
-                }
                 if let point = RNAGSGraphicsOverlay.createPoint(rawData: item) {
 
                     let agsGraphic = RNAGSGraphicsOverlay.rnPointToAGSGraphic(point, pointImageDictionary: self.pointImageDictionary)
