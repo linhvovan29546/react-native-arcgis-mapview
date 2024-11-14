@@ -564,8 +564,8 @@ private void startLocation(){
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            WritableMap map = createPointMap(e);
-            ArrayList<String>listAtribute = new ArrayList<String>();
+            WritableMap map = Arguments.createMap();
+            ArrayList<String>listAttribute = new ArrayList<String>();
             android.graphics.Point screenPoint = new android.graphics.Point(((int) e.getX()), ((int) e.getY()));
             ListenableFuture<List<IdentifyGraphicsOverlayResult>> future = mMapView.identifyGraphicsOverlaysAsync(screenPoint,15, false,maximumResult);
             future.addDoneListener(() -> {
@@ -577,10 +577,10 @@ private void startLocation(){
                         // More null checking >.>
                         if (!graphicResult.isEmpty()) {
                              for(Graphic result : graphicResult) {
-                                  Object atribute=result.getAttributes().get("referenceId");
-                                  if(atribute!=null){
-                                    String atributeString=atribute.toString();
-                                    listAtribute.add(atributeString);
+                                  Object attribute=result.getAttributes().get("referenceId");
+                                  if(attribute!=null){
+                                    String attributeString=attribute.toString();
+                                    listAttribute.add(attributeString);
                                   }
                              }
 
@@ -593,11 +593,10 @@ private void startLocation(){
                 } catch (InterruptedException | ExecutionException exception) {
                     exception.printStackTrace();
                 } finally {
-                    WritableArray nativeArray = Arguments.fromList(listAtribute);
+                    WritableArray nativeArray = Arguments.fromList(listAttribute);
                     if(nativeArray.size()>0){
                       map.putArray("graphicReferenceId", nativeArray);
                     }
-                  Viewpoint previousViewpoint= mapView.getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY);
                     emitEvent("onSingleTap",map);
                 }
             });
